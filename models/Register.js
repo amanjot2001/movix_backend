@@ -2,19 +2,19 @@ const mongoose = require("mongoose");
 const registerSchema = new mongoose.Schema({
   email: {
     type: String,
-    required: true,
+    required: false,
   },
   password: {
     type: String,
-    // required: true,
+    required: false,
   },
   securityQuestion: {
     type: String,
-    // required: true,
+    required: false,
   },
   securityQuestionAnswer: {
     type: String,
-    // required: true,
+    required: false,
   },
   token: {
     type: String,

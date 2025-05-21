@@ -65,26 +65,49 @@ routes.post("/checkUser", async (req, res) => {
   }
   res.status(200).json("Email is verified successfully..");
 });
-
 routes.post("/register", async (req, res) => {
-  const { email, password, securityQuestion, securityQuestionAnswer } =
-    req.body;
+  const { email, password, securityQuestion, securityQuestionAnswer } = req.body;
 
+  console.log("📩 Received register request with data:", {
+    email,
+    passwordExists: !!password,
+    securityQuestion,
+    securityQuestionAnswer,
+  });
+
+ 
   if (!email || !password || !securityQuestion || !securityQuestionAnswer) {
-    return res.status(500).json("All fields are required....");
+    console.error("❌ Validation failed: Missing required fields.");
+    return res.status(400).json({ error: "All fields are required." });
   }
+
   try {
-    const user = await registeredData.findOne({ email: email });
-    const hashPassword = await bcrypt.hash(password, 10);
-    const data = {
-      password: hashPassword,
+    console.log("🔍 Checking if user already exists with email:", email);
+    const existingUser = await registeredData.findOne({ email });
+
+    if (existingUser) {
+      console.warn("⚠️ Email already registered:", email);
+      return res.status(409).json({ error: "User already exists with this email." });
+    }
+
+    console.log("🔐 Hashing password...");
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new registeredData({
+      email,
+      password: hashedPassword,
       securityQuestion,
       securityQuestionAnswer,
-    };
-    await user.updateOne(data);
-    res.status(200).json(data);
+    });
+
+    console.log("📦 Saving new user to the database...");
+    await newUser.save();
+
+    console.log("✅ User registered successfully.");
+    res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
-    res.status(500).json(err);
+    console.error("❗ Error occurred during registration:", err);
+    res.status(500).json({ error: "Internal server error", details: err.message });
   }
 });
 
