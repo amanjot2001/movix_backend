@@ -19,9 +19,6 @@ const registerSchema = new mongoose.Schema({
   token: {
     type: String,
   },
-  otp:{
-    type:String,
-  }
 });
 const registeredData = mongoose.model("register", registerSchema);
 module.exports = registeredData;
